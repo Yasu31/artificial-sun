@@ -8,7 +8,8 @@ unsigned int a, c; // the complete address and command byte
 unsigned long total = 0L; // the 32 byte long to send to plug into the NEC protocol
 
 unsigned long second = 1000;
-unsigned long minute = second*60;
+unsigned long minute = second * 60;
+unsigned long hour = minute * 60;
 
 namespace table{
   byte on = 192;
@@ -47,41 +48,38 @@ namespace table{
 }
 
 void setup() {
+  // 8-minute sunset sequence
   controlLED(table::on);
-  controlLED(table::W);
-  for (int i=0; i<4; i++){
-    delay(second * 10);
-    controlLED(table::darker);
-  }
-  controlLED(table::B_3);
-  for (int i=0; i<4; i++){
-    delay(second * 10);
-    controlLED(table::darker);
-  }
   controlLED(table::R_4);
   for (int i=0; i<4; i++){
-    delay(second * 10);
+    delay(second * 30);
     controlLED(table::darker);
   }
   controlLED(table::R_2);
   for (int i=0; i<4; i++){
-    delay(second * 10);
+    delay(second * 30);
     controlLED(table::darker);
   }
-  delay(second * 40);
   controlLED(table::R_1);
-  delay(second * 40);
+  for (int i=0; i<4; i++){
+    delay(second * 30);
+    controlLED(table::darker);
+  }
   controlLED(table::R);
-  delay(second * 40);
+  for (int i=0; i<4; i++){
+    delay(second * 30);
+    controlLED(table::darker);
+  }
   controlLED(table::off);
 
-  delay(minute * (60 * 7 + 30));
+  delay(hour * 7 + minute * 15);
 
+  // 16-minute sunrise sequence
   controlLED(table::on);
   controlLED(table::R);
-  delay(minute * 2);
+  delay(minute * 4);
   controlLED(table::R_1);
-  delay(minute * 2);
+  delay(minute * 4);
   controlLED(table::R_2);
   for (int i=0; i<4; i++){
     delay(second * 30);
