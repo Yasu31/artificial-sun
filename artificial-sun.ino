@@ -1,6 +1,5 @@
-#include <IRremote.h>
-
-IRsend irsend;
+#define IR_SEND_PIN 3
+#include <IRremote.hpp>
 
 unsigned long command = 0;
 byte al, ar, cl, cr; // address & command byte and their inverse
@@ -10,6 +9,9 @@ unsigned long total = 0L; // the 32 byte long to send to plug into the NEC proto
 unsigned long second = 1000;
 unsigned long minute = second * 60;
 unsigned long hour = minute * 60;
+
+// how long to sleep the program for between the sunset (8 mins) and sunrise (16 mins) sequence
+unsigned long delay_minutes = 7 * 60 + 30 - 8 - 16;
 
 namespace table{
   byte on = 192;
@@ -48,6 +50,7 @@ namespace table{
 }
 
 void setup() {
+  IrSender.begin();
   // 8-minute sunset sequence
   controlLED(table::on);
   controlLED(table::R_4);
@@ -72,12 +75,15 @@ void setup() {
   }
   controlLED(table::off);
 
-  delay(hour * 7 + minute * 15);
+  delay(delay_minutes);
 
   // 16-minute sunrise sequence
   controlLED(table::on);
+  // assume it's the darkest LED setting now
   controlLED(table::R);
   delay(minute * 4);
+  // send again to ensure that LED is turned on
+  controlLED(table::on);
   controlLED(table::R_1);
   delay(minute * 4);
   controlLED(table::R_2);
@@ -110,7 +116,7 @@ void controlLED (byte command){
   cl = command;
   doen(al, cl);
   total = combineint(c, a);
-  irsend.sendNEC(total, 32);
+  IrSender.sendNEC(total, 32);
 }
 
 unsigned long combineint (unsigned int rechts, unsigned long links)
