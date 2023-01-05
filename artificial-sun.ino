@@ -75,7 +75,7 @@ void setup() {
   }
   controlLED(table::off);
 
-  delay(delay_minutes);
+  delay(delay_minutes * minute);
 
   // 16-minute sunrise sequence
   controlLED(table::on);
