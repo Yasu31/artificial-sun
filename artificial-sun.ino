@@ -106,6 +106,8 @@ void setup() {
     delay(second * 30);
     controlLED(table::brighter);
   }
+  delay(hour);
+  controlLED(table::off);
 }
 
 void loop() {
