@@ -4191,7 +4191,7 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 217.17 43.18 0)
+		(at 218.44 43.18 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4199,9 +4199,9 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "9ff0c7fb-ed4a-4965-8e07-db59f8036c1d")
-		(property "Netclass" "LED"
-			(at 217.8685 40.64 0)
+		(uuid "50d3cc88-a07a-4112-9354-e0842eb16ea1")
+		(property "Netclass" "Power"
+			(at 219.1385 40.64 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4214,17 +4214,17 @@
 	(netclass_flag ""
 		(length 2.54)
 		(shape round)
-		(at 222.25 57.15 90)
+		(at 222.25 58.42 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "bc58d74b-8dc9-4cc1-8e5a-2a309bc09c57")
-		(property "Netclass" "LED"
-			(at 219.71 56.4515 90)
+		(uuid "de7f13b1-417c-403b-a2b6-c3d84071d3dd")
+		(property "Netclass" "Power"
+			(at 224.79 57.7215 90)
 			(effects
 				(font
 					(size 1.27 1.27)
