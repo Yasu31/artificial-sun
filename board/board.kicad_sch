@@ -3099,6 +3099,16 @@
 	)
 	(wire
 		(pts
+			(xy 100.33 59.69) (xy 105.41 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "036fb2fd-a349-4769-85c8-759da6879c9b")
+	)
+	(wire
+		(pts
 			(xy 78.74 91.44) (xy 80.01 91.44)
 		)
 		(stroke
@@ -3399,16 +3409,6 @@
 	)
 	(wire
 		(pts
-			(xy 92.71 81.28) (xy 92.71 59.69)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "49511a57-128a-414e-99ad-1ac73e60b364")
-	)
-	(wire
-		(pts
 			(xy 200.66 68.58) (xy 200.66 78.74)
 		)
 		(stroke
@@ -3489,16 +3489,6 @@
 	)
 	(wire
 		(pts
-			(xy 95.25 88.9) (xy 87.63 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6174297a-8775-48b6-b258-b854f244e5ba")
-	)
-	(wire
-		(pts
 			(xy 143.51 109.22) (xy 143.51 80.01)
 		)
 		(stroke
@@ -3516,6 +3506,36 @@
 			(type default)
 		)
 		(uuid "646e59de-08a3-4dc4-b5c7-96eb392751b5")
+	)
+	(wire
+		(pts
+			(xy 100.33 88.9) (xy 100.33 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "682da696-9cf5-456d-ad87-ad3601caa68e")
+	)
+	(wire
+		(pts
+			(xy 87.63 88.9) (xy 100.33 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6bc53dba-fbbb-4c1a-b51b-e214c726c21b")
+	)
+	(wire
+		(pts
+			(xy 102.87 64.77) (xy 105.41 64.77)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6e9c31c2-2bd5-4c38-ab36-e54b97cca50e")
 	)
 	(wire
 		(pts
@@ -3609,6 +3629,16 @@
 	)
 	(wire
 		(pts
+			(xy 102.87 81.28) (xy 102.87 64.77)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "79814ab9-2037-46ab-bf1b-7d806de60291")
+	)
+	(wire
+		(pts
 			(xy 176.53 102.87) (xy 176.53 109.22)
 		)
 		(stroke
@@ -3669,6 +3699,16 @@
 	)
 	(wire
 		(pts
+			(xy 87.63 81.28) (xy 102.87 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "887fbfa0-0766-4ed9-8a11-26dbef600473")
+	)
+	(wire
+		(pts
 			(xy 90.17 62.23) (xy 90.17 77.47)
 		)
 		(stroke
@@ -3686,16 +3726,6 @@
 			(type default)
 		)
 		(uuid "8c98f7e7-504e-4759-8eb8-39726fe666fd")
-	)
-	(wire
-		(pts
-			(xy 87.63 81.28) (xy 92.71 81.28)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8ce58d20-7125-436c-84ea-63565da6fb07")
 	)
 	(wire
 		(pts
@@ -3779,16 +3809,6 @@
 	)
 	(wire
 		(pts
-			(xy 92.71 59.69) (xy 105.41 59.69)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b115241f-7f97-43f4-8c05-d176fc7d583d")
-	)
-	(wire
-		(pts
 			(xy 87.63 96.52) (xy 106.68 96.52)
 		)
 		(stroke
@@ -3856,16 +3876,6 @@
 			(type default)
 		)
 		(uuid "b5191a4b-6397-4c28-b0d1-11d01b9aee3f")
-	)
-	(wire
-		(pts
-			(xy 95.25 64.77) (xy 95.25 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b59be01e-36d7-43e5-8816-68cd44076c4b")
 	)
 	(wire
 		(pts
@@ -4146,16 +4156,6 @@
 			(type default)
 		)
 		(uuid "f2acb0a8-acfa-42e4-bf47-5a5c9f683b3c")
-	)
-	(wire
-		(pts
-			(xy 105.41 64.77) (xy 95.25 64.77)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fad049a5-efea-4792-bcdc-a4610eb3597a")
 	)
 	(text "7seg LED Display\n- pins 6, 8, 9, 12 don't need resistors but are placed in\n the diagram so that display could be flipped if needed\n- the pin mapping was chosen so that the wiring to the Arduino\n is easier"
 		(exclude_from_sim no)
