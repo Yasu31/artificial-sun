@@ -72,6 +72,16 @@ bool checkButton(int buttonPin, bool &buttonState, bool &lastButtonState, unsign
   return false;
 }
 
+int convertToBrightness(float value) {
+  // convert value between 0~1 to brightness value between 0~255 using an exponential function so that it feels natural to a human
+  value = constrain(value, 0, 1);
+  if (value == 0)
+    return 0;
+  float e = 2.71828; // Euler's number
+  int brightness = pow(e, 5*value)/pow(e,5) * 255;
+  return brightness;
+}
+
 void loop() {
   unsigned long currentMillis = millis();
   sevseg.refreshDisplay();
@@ -87,16 +97,16 @@ void loop() {
 
   if (buttonPushed_l || buttonPushed_r) {
     // increment the counter at a constant rate if a button is held down
-    if (currentMillis - last_increment_time >= 200){
+    if (currentMillis - last_increment_time >= 100){
       if (buttonPushed_l)
         count--;
       if (buttonPushed_r)
         count++;
-      count = constrain(count, 0, 255);
+      count = constrain(count, 0, 100);
       last_increment_time = currentMillis;
     }
   }
-  analogWrite(ledPin, count);
-  sevseg.setNumber(count, 0);
+  analogWrite(ledPin, convertToBrightness(0.01*count));
+  sevseg.setNumber(count, 2);
 }
 
