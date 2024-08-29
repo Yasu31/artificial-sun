@@ -3,7 +3,7 @@ SevSeg sevseg; //Instantiate a seven segment object
 // https://github.com/DeanIsMe/SevSeg
 
 unsigned long previousMillis = 0;
-int count = 1000;
+int count = 0;
 
 // set up variables for buttons
 const int buttonPin_l = 19;
@@ -19,6 +19,7 @@ bool buttonState_r = LOW;
 bool lastButtonState_r = LOW;
 unsigned long lastDebounceTime_r = 0;
 
+unsigned long last_increment_time = 0;  // last time the counter was incremented
 const int ledPin = 6;  // high-power LED pin
 
 void setup() {
@@ -36,6 +37,9 @@ void setup() {
   updateWithDelays, leadingZeros, disableDecPoint);
 
   pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin_l, INPUT_PULLUP);
+  pinMode(buttonPin_c, INPUT_PULLUP);
+  pinMode(buttonPin_r, INPUT_PULLUP);
 }
 
 // Function to check for button press with debouncing
@@ -55,7 +59,7 @@ bool checkButton(int buttonPin, bool &buttonState, bool &lastButtonState, unsign
       buttonState = reading;
 
       // Only return true if the button is pressed
-      if (buttonState == HIGH) {
+      if (buttonState == LOW) {
         return true;
       }
     }
@@ -69,22 +73,30 @@ bool checkButton(int buttonPin, bool &buttonState, bool &lastButtonState, unsign
 }
 
 void loop() {
-  digitalWrite(ledPin, HIGH);
   unsigned long currentMillis = millis();
   sevseg.refreshDisplay();
-  if (currentMillis - previousMillis >= 500){
-    // just count down for nowas example
-    previousMillis = currentMillis;
-    count--;
-    sevseg.setNumber(count, 0);
-  }
-
 
   // read the button output
-  // note: buttonDown is true if the button was pressed down in this step, buttonState is whether it is currently pressed
+  // note: buttonDown is true if the button was pressed down in this step, buttonPushed is whether it is currently pressed
   bool buttonDown_l = checkButton(buttonPin_l, buttonState_l, lastButtonState_l, lastDebounceTime_l);
   bool buttonDown_c = checkButton(buttonPin_c, buttonState_c, lastButtonState_c, lastDebounceTime_c);
   bool buttonDown_r = checkButton(buttonPin_r, buttonState_r, lastButtonState_r, lastDebounceTime_r);
+  bool buttonPushed_l = buttonState_l == LOW;
+  bool buttonPushed_c = buttonState_c == LOW;
+  bool buttonPushed_r = buttonState_r == LOW;
 
+  if (buttonPushed_l || buttonPushed_r) {
+    // increment the counter at a constant rate if a button is held down
+    if (currentMillis - last_increment_time >= 200){
+      if (buttonPushed_l)
+        count--;
+      if (buttonPushed_r)
+        count++;
+      count = constrain(count, 0, 255);
+      last_increment_time = currentMillis;
+    }
+  }
+  analogWrite(ledPin, count);
+  sevseg.setNumber(count, 0);
 }
 
