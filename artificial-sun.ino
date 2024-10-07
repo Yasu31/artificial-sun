@@ -54,6 +54,16 @@ const float smoothingFactor = 0.002;
 unsigned long ledTurnOffTime = 0;
 const unsigned long LED_AUTO_OFF_DURATION = 60UL * 60 * 1000;
 
+// Variables for button press handling
+bool ignoreCurrentPress_l = false;
+bool ignoreCurrentPress_r = false;
+bool ignoreCurrentPress_c = false;
+
+// Constants for acceleration effect
+const unsigned long BASE_INTERVAL = 300; // initial interval between increments
+const unsigned long MIN_INTERVAL = 10;   // minimum interval between increments
+const unsigned long MAX_PRESS_DURATION = 6000;
+
 void setup() {
   byte numDigits = 4;
   byte digitPins[] = {5, 9, 10, 15};
@@ -107,7 +117,7 @@ bool checkButton(int buttonPin, bool &buttonState, bool &lastButtonState, unsign
 int convertToPWM(float brightnessValue) {
   // convert value between 0~1 to brightness value between 0~255 using an exponential function so that it feels natural to a human
   brightnessValue = constrain(brightnessValue, 0, 1);
-  if (brightnessValue== 0)
+  if (brightnessValue == 0)
     return 0;
   float e = 2.71828; // Euler's number
   int pwmValue = pow(e, 5*brightnessValue)/pow(e,5) * 255;
@@ -137,23 +147,22 @@ void loop() {
     lastInteractionTime = currentMillis;
     if (!displayOn) {
       displayOn = true;
+      // ignore the press which turns on the display
+      ignoreCurrentPress_l = true;
     } else {
       leftButtonPressStartTime = currentMillis;
+      ignoreCurrentPress_l = false;
     }
   }
 
-  if (displayOn && buttonPushed_l && timerPaused) {
+  if (displayOn && !ignoreCurrentPress_l && buttonPushed_l && timerPaused) {
     unsigned long pressDuration = currentMillis - leftButtonPressStartTime;
-    unsigned long interval = 300; // ms
+    unsigned long interval = BASE_INTERVAL - (BASE_INTERVAL - MIN_INTERVAL) * constrain((float)pressDuration / MAX_PRESS_DURATION, 0, 1);
+    interval = constrain(interval, MIN_INTERVAL, BASE_INTERVAL);
+
     if ((currentMillis - lastIncrementTime_l) >= interval) {
-      unsigned long decrementAmount;
-      if (pressDuration < 1000) {
-        decrementAmount = 1UL * 60 * 1000; // 1 minute
-      } else if (pressDuration < 3000) {
-        decrementAmount = 5UL * 60 * 1000; // 5 minutes
-      } else {
-        decrementAmount = 15UL * 60 * 1000; // 15 minutes
-      }
+      unsigned long decrementAmount = 1UL * 60 * 1000; // 1 minute
+
       if (remainingTime >= decrementAmount) {
         remainingTime -= decrementAmount;
       } else {
@@ -167,6 +176,7 @@ void loop() {
 
   if (buttonReleased_l) {
     leftButtonPressStartTime = 0;
+    ignoreCurrentPress_l = false;
   }
   lastButtonPushed_l = buttonPushed_l;
 
@@ -175,23 +185,20 @@ void loop() {
     lastInteractionTime = currentMillis;
     if (!displayOn) {
       displayOn = true;
+      ignoreCurrentPress_r = true;
     } else {
       rightButtonPressStartTime = currentMillis;
+      ignoreCurrentPress_r = false;
     }
   }
 
-  if (displayOn && buttonPushed_r && timerPaused) {
+  if (displayOn && !ignoreCurrentPress_r && buttonPushed_r && timerPaused) {
     unsigned long pressDuration = currentMillis - rightButtonPressStartTime;
-    unsigned long interval = 300; // ms
+    unsigned long interval = BASE_INTERVAL - (BASE_INTERVAL - MIN_INTERVAL) * constrain((float)pressDuration / MAX_PRESS_DURATION, 0, 1);
+
     if ((currentMillis - lastIncrementTime_r) >= interval) {
-      unsigned long incrementAmount;
-      if (pressDuration < 1000) {
-        incrementAmount = 1UL * 60 * 1000; // 1 minute
-      } else if (pressDuration < 3000) {
-        incrementAmount = 5UL * 60 * 1000; // 5 minutes
-      } else {
-        incrementAmount = 15UL * 60 * 1000; // 15 minutes
-      }
+      unsigned long incrementAmount = 1UL * 60 * 1000; // 1 minute
+
       remainingTime += incrementAmount;
       setDuration = remainingTime; // Update setDuration
       lastIncrementTime_r = currentMillis;
@@ -201,6 +208,7 @@ void loop() {
 
   if (buttonReleased_r) {
     rightButtonPressStartTime = 0;
+    ignoreCurrentPress_r = false;
   }
   lastButtonPushed_r = buttonPushed_r;
 
@@ -211,10 +219,13 @@ void loop() {
     lastInteractionTime = currentMillis;
     if (!displayOn) {
       displayOn = true;
+      ignoreCurrentPress_c = true;
+    } else {
+      ignoreCurrentPress_c = false;
     }
   }
 
-  if (displayOn && buttonPushed_c) {
+  if (displayOn && !ignoreCurrentPress_c && buttonPushed_c) {
     if (!centerButtonLongPressHandled) {
       unsigned long pressDuration = currentMillis - centerButtonPressTime;
       if (pressDuration >= LONG_PRESS_DURATION) {
@@ -230,12 +241,13 @@ void loop() {
 
   if (buttonReleased_c) {
     unsigned long pressDuration = currentMillis - centerButtonPressTime;
-    if (displayOn && !centerButtonLongPressHandled && pressDuration < LONG_PRESS_DURATION) {
+    if (displayOn && !centerButtonLongPressHandled && pressDuration < LONG_PRESS_DURATION && !ignoreCurrentPress_c) {
       // Short press detected
       timerPaused = !timerPaused; // Toggle pause/restart
       lastInteractionTime = currentMillis;
     }
     centerButtonPressTime = 0;
+    ignoreCurrentPress_c = false;
   }
 
   lastButtonPushed_c = buttonPushed_c;
@@ -254,7 +266,8 @@ void loop() {
   }
 
   // Handle display blinking when paused
-  if (timerPaused) {
+  // don't blink when the time is being adjusted
+  if (timerPaused && !(buttonPushed_l || buttonPushed_r)) {
     if (currentMillis - lastBlinkTime >= 300) {
       displayBlinkState = !displayBlinkState;
       lastBlinkTime = currentMillis;
@@ -267,7 +280,7 @@ void loop() {
   float targetBrightness = 0;
   unsigned long rampup_dur = 20UL * 60 * 1000; // how long to ramp up to full brightness
   if (remainingTime <= rampup_dur) {
-    targetBrightness = (rampup_dur - remainingTime) / rampup_dur;
+    targetBrightness = (rampup_dur - remainingTime) / (float)rampup_dur;
   } else {
     targetBrightness = 0;
   }
