@@ -255,7 +255,12 @@ void updateBrightness() {
   float targetBrightness = 0;
   unsigned long rampup_dur = 20UL * 60 * 1000; // Ramp up over 20 minutes
   if (remainingTime <= rampup_dur) {
-    targetBrightness = (rampup_dur - remainingTime) / (float)rampup_dur;
+    float targetMaxBrightness = (rampup_dur - remainingTime) / (float)rampup_dur;
+    // pulse it so that the brightness changes between 50% and 100% of the targetMaxBrightness
+    float pulseFrequency = 0.1; // Pulse frequency in Hz
+    // changes between 0~1
+    float sineFactor = (sin(2 * PI * pulseFrequency * (currentMillis / 1000.0)) + 1) / 2;
+    targetBrightness = targetMaxBrightness * (0.5 + 0.5 * sineFactor);
   } else {
     targetBrightness = 0;
   }
