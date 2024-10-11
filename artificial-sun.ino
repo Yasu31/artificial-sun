@@ -255,7 +255,8 @@ void updateBrightness() {
   float targetBrightness = 0;
   unsigned long rampup_dur = 20UL * 60 * 1000; // Ramp up over 20 minutes
   if (remainingTime <= rampup_dur) {
-    float targetMaxBrightness = (rampup_dur - remainingTime) / (float)rampup_dur;
+    float targetMaxBrightness = (float)(rampup_dur - remainingTime) / rampup_dur;
+    targetMaxBrightness = constrain(targetMaxBrightness, 0, 1);
     // pulse it so that the brightness changes between 50% and 100% of the targetMaxBrightness
     float pulseFrequency = 0.1; // Pulse frequency in Hz
     // changes between 0~1
@@ -265,8 +266,8 @@ void updateBrightness() {
     targetBrightness = 0;
   }
 
-  if (timerPaused)
-    targetBrightness = constrain(targetBrightness, 0, 0.2); // Cap at 20%
+  if (displayOn)
+    targetBrightness = constrain(targetBrightness, 0, 0.05); // Cap at 5%
 
   // Turn off LED after auto-off duration
   if (ledTurnOffTime != 0 && currentMillis >= ledTurnOffTime) {
