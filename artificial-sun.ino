@@ -253,18 +253,23 @@ void updateDisplay() {
 void updateBrightness() {
   // Adjust LED brightness
   float targetBrightness = 0;
-  unsigned long rampup_dur = 20UL * 60 * 1000; // Ramp up over 20 minutes
-  if (remainingTime <= rampup_dur) {
-    float targetMaxBrightness = (float)(rampup_dur - remainingTime) / rampup_dur;
+  unsigned long rampdown_dur = 10UL * 60 * 1000; // gradually lower brightness ("sunset" effect)
+  unsigned long rampup_dur = 20UL * 60 * 1000; // gradually increase brightness ("sunrise" effect)
+  float targetMaxBrightness = 0;
+  // pulse it so that the brightness changes between 50% and 100% of the targetMaxBrightness
+  float pulseFrequency = 0.1;  // Pulse frequency in Hz
+  float sineFactor = (sin(2 * PI * pulseFrequency * (currentMillis / 1000.0)) + 1) / 2;  // changes between 0~1
+
+  if ((setDuration - remainingTime) <= rampdown_dur) {
+    targetMaxBrightness = 1 - (setDuration - remainingTime) / (float)rampdown_dur;
+    targetMaxBrightness *= 0.3; // "sunset" effect should be darker than sunrise
+  } else if (remainingTime <= rampup_dur) {
+    targetMaxBrightness = (rampup_dur - remainingTime) / (float)rampup_dur;
     targetMaxBrightness = constrain(targetMaxBrightness, 0, 1);
-    // pulse it so that the brightness changes between 50% and 100% of the targetMaxBrightness
-    float pulseFrequency = 0.1; // Pulse frequency in Hz
-    // changes between 0~1
-    float sineFactor = (sin(2 * PI * pulseFrequency * (currentMillis / 1000.0)) + 1) / 2;
-    targetBrightness = targetMaxBrightness * (0.5 + 0.5 * sineFactor);
   } else {
-    targetBrightness = 0;
+    targetMaxBrightness = 0;
   }
+  targetBrightness = targetMaxBrightness * (0.5 + 0.5 * sineFactor);
 
   if (displayOn)
     targetBrightness = constrain(targetBrightness, 0, 0.05); // Cap at 5%
