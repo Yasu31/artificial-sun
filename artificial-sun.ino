@@ -2,39 +2,40 @@
 SevSeg sevseg; // Instantiate a seven-segment object
 
 // Timer variables
-unsigned long lastInteractionTime = 0;
-bool displayOn = true;
 unsigned long setDuration = 7UL * 60 * 60 * 1000; // User-set duration
 unsigned long remainingTime = setDuration;        // Remaining time in milliseconds
+unsigned long lastTimerUpdateTime = 0;
+unsigned long currentMillis = 0;
 bool timerPaused = true;
+
+// Display variables
+unsigned long lastInteractionTime = 0;
+bool displayOn = true;
 unsigned long lastBlinkTime = 0;
 bool displayBlinkState = true;
-unsigned long lastTimerUpdateTime = 0;
 
-// Center button long press duration
-const unsigned long LONG_PRESS_DURATION = 1000; // 1 second for long press
+// Center button long press duration in milliseconds
+const unsigned long LONG_PRESS_DURATION = 1000;
 
 // LED brightness variables
 float currentBrightness = 0.0;
-const float smoothingFactor = 0.002;
+const float smoothingFactor = 0.005;
 
 // LED auto-off variables
 unsigned long ledTurnOffTime = 0;
 const unsigned long LED_AUTO_OFF_DURATION = 60UL * 60 * 1000;
 
 // Constants for acceleration effect
-const unsigned long BASE_INTERVAL = 300; // Initial interval between increments
-const unsigned long MIN_INTERVAL = 10;   // Minimum interval between increments
+const unsigned long BASE_INTERVAL = 300; // Initial interval between increments (at start)
+const unsigned long MIN_INTERVAL = 10;   // Minimum interval between increments (after pressing for long time)
 const unsigned long MAX_PRESS_DURATION = 6000;
 
-// Button pins
+// pin assignments
 const int buttonPin_l = 19;
 const int buttonPin_c = 20;
 const int buttonPin_r = 21;
 const int ledPin = 6; // High-power LED pin
 
-// Current time in milliseconds
-unsigned long currentMillis = 0;
 
 // Button class to handle debouncing and state
 class Button {
@@ -52,7 +53,10 @@ public:
                     lastButtonPushed(false), pressStartTime(0),
                     ignoreCurrentPress(false), lastIncrementTime(0) {}
 
-  bool checkButton(unsigned long debounceDelay = 50) {
+  bool checkButton() {
+    // check the button state, with debouncing
+    // returns true at the moment the button is pressed down
+    const unsigned long debounceDelay = 50;
     int reading = digitalRead(pin);
 
     if (reading != lastState) {
@@ -109,18 +113,25 @@ void setup() {
   pinMode(rightButton.pin, INPUT_PULLUP);
 
   lastInteractionTime = millis();
+
+  // Serial print for debugging
+  // don't use serial print on final uploaded code, since it delays the loop
+  // Serial.begin(115200);
 }
 
 int convertToPWM(float brightnessValue) {
+  // convert brightness value 0~1 to PWM value.
+  // use exponential function so human can perceive the brightness linearly
   brightnessValue = constrain(brightnessValue, 0, 1);
   if (brightnessValue < 0.001)
     return 0;
-  float e = 2.71828; // Euler's number
+  float e = 2.71828;
   int pwmValue = pow(e, 5 * brightnessValue) / pow(e, 5) * 255;
   return pwmValue;
 }
 
 void handleTimeAdjustment(Button &button, bool isIncrement) {
+  // isIncrement: true for the increment button, false for the decrement button
   if (button.checkButton()) {
     lastInteractionTime = currentMillis;
     if (!displayOn) {
@@ -135,6 +146,7 @@ void handleTimeAdjustment(Button &button, bool isIncrement) {
   if (displayOn && !button.ignoreCurrentPress && button.isPressed() &&
       timerPaused) {
     unsigned long pressDuration = currentMillis - button.pressStartTime;
+    // shorten the interval time between each step, the longer the button is pressed
     unsigned long interval = BASE_INTERVAL -
                              (BASE_INTERVAL - MIN_INTERVAL) *
                                  constrain((float)pressDuration /
@@ -226,6 +238,7 @@ void updateTimer() {
 
 void updateDisplay() {
   // Handle display blinking when paused
+  // don't blink if the time is being adjusted (i.e. left or right button is pressed)
   if (timerPaused && !(leftButton.isPressed() || rightButton.isPressed())) {
     if (currentMillis - lastBlinkTime >= 300) {
       displayBlinkState = !displayBlinkState;
@@ -237,6 +250,7 @@ void updateDisplay() {
 
   if (displayOn) {
     if (displayBlinkState) {
+      // e.g. 8 hours 10 mins -> show as "08.10" on the display
       unsigned long totalMinutes = remainingTime / 60000UL;
       unsigned int hours = totalMinutes / 60;
       unsigned int minutes = totalMinutes % 60;
@@ -256,23 +270,25 @@ void updateBrightness() {
   unsigned long rampdown_dur = 10UL * 60 * 1000; // gradually lower brightness ("sunset" effect)
   unsigned long rampup_dur = 20UL * 60 * 1000; // gradually increase brightness ("sunrise" effect)
   float targetMaxBrightness = 0;
-  // pulse it so that the brightness changes between 50% and 100% of the targetMaxBrightness
+  // pulse it so that the brightness changes as a sine wave (for visual effect + not overheat the LEDs)
   float pulseFrequency = 0.1;  // Pulse frequency in Hz
   float sineFactor = (sin(2 * PI * pulseFrequency * (currentMillis / 1000.0)) + 1) / 2;  // changes between 0~1
 
-  if ((setDuration - remainingTime) <= rampdown_dur) {
-    targetMaxBrightness = 1 - (setDuration - remainingTime) / (float)rampdown_dur;
-    targetMaxBrightness *= 0.3; // "sunset" effect should be darker than sunrise
-  } else if (remainingTime <= rampup_dur) {
+  if (remainingTime <= rampup_dur) {
     targetMaxBrightness = (rampup_dur - remainingTime) / (float)rampup_dur;
     targetMaxBrightness = constrain(targetMaxBrightness, 0, 1);
+  }
+  else if ((setDuration - remainingTime) <= rampdown_dur && !timerPaused) {
+    targetMaxBrightness = 1 - (setDuration - remainingTime) / (float)rampdown_dur;
+    targetMaxBrightness *= 0.3; // "sunset" effect should be darker than sunrise
   } else {
     targetMaxBrightness = 0;
   }
+  // smoothly pulse between 50% and 100% of the targetMaxBrightness
   targetBrightness = targetMaxBrightness * (0.5 + 0.5 * sineFactor);
 
   if (displayOn)
-    targetBrightness = constrain(targetBrightness, 0, 0.05); // Cap at 5%
+    targetBrightness = constrain(targetBrightness, 0, 0.02); // limit brightness
 
   // Turn off LED after auto-off duration
   if (ledTurnOffTime != 0 && currentMillis >= ledTurnOffTime) {
@@ -284,8 +300,15 @@ void updateBrightness() {
   currentBrightness = smoothingFactor * targetBrightness +
                       (1.0 - smoothingFactor) * currentBrightness;
 
+  // Serial.print("0., 1., ");  // to define the y axis range
+  // Serial.print(targetMaxBrightness);
+  // Serial.print(", ");
+  // Serial.print(targetBrightness);
+  // Serial.print(", ");
+  // Serial.println(currentBrightness);
+
   int pwmValue =
-      convertToPWM(constrain(currentBrightness, 0, 1) * 0.8); // Max 80%
+      convertToPWM(currentBrightness);
   analogWrite(ledPin, pwmValue);
 }
 
