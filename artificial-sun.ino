@@ -126,7 +126,8 @@ int convertToPWM(float brightnessValue) {
   if (brightnessValue < 0.001)
     return 0;
   float e = 2.71828;
-  int pwmValue = pow(e, 5 * brightnessValue) / pow(e, 5) * 255;
+  // make it go between 0 ~ 255
+  int pwmValue = pow(e, 5 * brightnessValue) / pow(e, 5) * 256 - 1;
   return pwmValue;
 }
 
@@ -288,7 +289,7 @@ void updateBrightness() {
   targetBrightness = targetMaxBrightness * (0.5 + 0.5 * sineFactor);
 
   if (displayOn)
-    targetBrightness = constrain(targetBrightness, 0, 0.02); // limit brightness
+    targetBrightness = constrain(targetBrightness, 0, 0.03); // limit brightness
 
   // Turn off LED after auto-off duration
   if (ledTurnOffTime != 0 && currentMillis >= ledTurnOffTime) {
