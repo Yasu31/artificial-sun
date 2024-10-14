@@ -277,11 +277,12 @@ void updateBrightness() {
 
   if (remainingTime <= rampup_dur) {
     targetMaxBrightness = (rampup_dur - remainingTime) / (float)rampup_dur;
-    targetMaxBrightness = constrain(targetMaxBrightness, 0, 1);
+    targetMaxBrightness = constrain(targetMaxBrightness, 0.06, 1);
   }
   else if ((setDuration - remainingTime) <= rampdown_dur && !timerPaused) {
-    targetMaxBrightness = 1 - (setDuration - remainingTime) / (float)rampdown_dur;
-    targetMaxBrightness *= 0.3; // "sunset" effect should be darker than sunrise
+    targetMaxBrightness = 1 - (setDuration - remainingTime) / (float)rampdown_dur;  // 1 -> 0
+    targetMaxBrightness *= 0.2; // 0.2 -> 0  "sunset" effect should be darker than sunrise
+    targetMaxBrightness += 0.06;  // 0.206 -> 0.006 add a small offset so the LED doesn't turn off completely
   } else {
     targetMaxBrightness = 0;
   }
