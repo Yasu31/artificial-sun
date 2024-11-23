@@ -4,7 +4,7 @@
 ここではファームウェアのArduinoスケッチと基板デザイン(KiCad)を公開しています
 - プロジェクト: https://yasunori.jp/artificial-sun
 - 外装部品: https://grabcad.com/library/artificial-sun-wake-up-light-for-dark-mornings-1
-- 動画: URLを追加
+- 動画: https://youtu.be/eCHGJ3ehzJc
 
 ## 電子部品
 必要な電子パーツはこちらのスプレッドシートにまとめてあります。すべて秋月電子で買えます。
