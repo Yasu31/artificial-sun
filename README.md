@@ -21,7 +21,7 @@
 - LEDは10センチほどのワイヤで基板に接続してください。曲げやすいワイヤの方が外装パーツに挿入しやすいです。
 - M3、長さ12mmのナットとボルト4本で組み立てます。
 
-![](/photos/all.png)
-![](/photos/board_1.png)
-![](/photos/board_2.png)
-![](/photos/LED.png)
+![](/photos/all.jpg)
+![](/photos/board_1.jpg)
+![](/photos/board_2.jpg)
+![](/photos/LED.jpg)
