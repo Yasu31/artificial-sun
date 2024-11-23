@@ -2,8 +2,8 @@
 自然な明かりで朝起きれる小型デバイス
 
 ここではファームウェアのArduinoスケッチと基板デザイン(KiCad)を公開しています
-- プロジェクト: https://yasunori.jp/artificial-sun
-- 外装部品: https://grabcad.com/library/artificial-sun-wake-up-light-for-dark-mornings-1
+- プロジェクト: https://yasunori.jp/pocket-sunrise
+- 外装部品: https://grabcad.com/library/pocket-sunrise-1
 - 動画: https://youtu.be/eCHGJ3ehzJc
 
 ## 電子部品
